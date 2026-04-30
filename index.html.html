@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABAKAR ADOUM KELLÉ — Portfolio BTS SIO SISR</title>
+
+  <!-- ============================================================
+       POLICES GOOGLE FONTS
+       - Syne       : police d'affichage pour les titres (bold/800)
+       - DM Sans    : police de corps de texte (300/400/500)
+  ============================================================ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+  <style>
+
+    /* ============================================================
+       1. RESET & VARIABLES CSS GLOBALES
+       Supprime les marges/paddings par défaut du navigateur et
+       définit toutes les couleurs, polices et ombres du projet
+       sous forme de variables réutilisables partout dans le CSS.
+    ============================================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box; /* inclut border et padding dans la taille */
+    }
+
+    :root {
+      /* --- Palette principale (5 couleurs d'accent) --- */
+      --c1: #6C3BFF; /* violet  — couleur principale */
+      --c2: #FF5C7A; /* rose/rouge — couleur secondaire */
+      --c3: #00D4AA; /* vert/cyan — statut actif, succès */
+      --c4: #FF9A3C; /* orange — mise en avant (ex : PingCastle) */
+      --c5: #C840E9; /* violet clair — accent secondaire */
+
+      /* --- Fonds de page et surfaces --- */
+      --bg:       #080810; /* fond principal très sombre */
+      --surface:  #0F0F1C; /* surface légèrement plus claire (sections alternées) */
+      --surface2: #171726; /* surface encore plus claire (cartes intérieures) */
+      --surface3: #1E1E30; /* non utilisé, réservé pour futur usage */
+
+      /* --- Couleurs de texte --- */
+      --text:   #F0EEF8; /* texte principal (presque blanc) */
+      --muted:  #7A779A; /* texte secondaire/atténué */
+      --muted2: #4A4870; /* texte très atténué (footer, labels discrets) */
+
+      /* --- Polices --- */
+      --fh: 'Syne', sans-serif;    /* font heading : titres */
+      --fb: 'DM Sans', sans-serif; /* font body : texte courant */
+
+      /* --- Lueurs pour les ombres colorées (non utilisées directement ici) --- */
+      --glow1: rgba(108,59,255,0.35);
+      --glow2: rgba(255,92,122,0.25);
+      --glow3: rgba(0,212,170,0.2);
+    }
+
+    /* Défilement fluide au clic sur les ancres de navigation */
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--fb);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden; /* empêche le défilement horizontal */
+      cursor: none;        /* masque le curseur natif → remplacé par le curseur custom JS */
+    }
+
+
+    /* ============================================================
+       2. CURSEUR PERSONNALISÉ
+       Deux éléments superposés :
+       - #cursor      : point central coloré (suit la souris instantanément)
+       - #cursor-ring : anneau extérieur (suit avec un léger retard via JS)
+       Le JS gère le positionnement et les changements au survol.
+    ============================================================ */
+    #cursor {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: var(--c1);
+      border-radius: 50%;
+      pointer-events: none;      /* ne bloque pas les clics */
+      z-index: 9999;
+      transform: translate(-50%, -50%); /* centré sur la position de la souris */
+      transition: width .2s, height .2s, background .2s, opacity .2s;
+      mix-blend-mode: screen;    /* se mélange visuellement avec ce qu'il y a dessous */
+    }
+
+    #cursor-ring {
+      position: fixed;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(108,59,255,0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: all .12s ease-out; /* légère inertie pour le suivi */
+    }
+
+    body:hover #cursor { opacity: 1; }
+
+
+    /* ============================================================
+       3. TEXTURE GRAIN (NOISE OVERLAY)
+       Un SVG inline encodé en base64 qui génère un grain subtil
+       sur toute la page, positionné en position fixed pour couvrir
+       même lors du scroll. Ajoute de la profondeur visuelle.
+    ============================================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9997;
+      opacity: 0.4;
+    }
+
+
+    /* ============================================================
+       4. BARRE DE DÉFILEMENT CUSTOM
+       Remplace la scrollbar par défaut par une version fine et
+       colorée, cohérente avec la palette du portfolio.
+    ============================================================ */
+    ::-webkit-scrollbar        { width: 4px; }
+    ::-webkit-scrollbar-track  { background: var(--bg); }
+    ::-webkit-scrollbar-thumb  { background: var(--c1); border-radius: 2px; }
+
+
+    /* ============================================================
+       5. BARRE DE NAVIGATION (NAV)
+       Fixée en haut de page, semi-transparente avec flou de fond
+       (backdrop-filter). Rétrécit légèrement au scroll grâce à
+       la classe `.scrolled` ajoutée par JS.
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 3rem;
+      background: rgba(8,8,16,0.75);       /* fond semi-transparent */
+      backdrop-filter: blur(20px);          /* flou de fond (glassmorphism) */
+      -webkit-backdrop-filter: blur(20px);  /* préfixe Safari */
+      border-bottom: 1px solid rgba(108,59,255,0.12);
+      transition: padding .3s;             /* transition douce au scroll */
+    }
+
+    /* Réduit le padding quand l'utilisateur fait défiler la page */
+    nav.scrolled { padding: .7rem 3rem; }
+
+    /* Logo AAK — dégradé de texte violet → rose */
+    .nav-logo {
+      font-family: var(--fh);
+      font-weight: 800;
+      font-size: 1rem;
+      background: linear-gradient(90deg, var(--c1), var(--c2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: .02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: color .25s;
+      position: relative;
+    }
+
+    /* Soulignement animé : pseudo-élément qui se déploie au survol */
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0; right: 0;
+      height: 1px;
+      background: var(--c1);
+      transform: scaleX(0);        /* masqué par défaut */
+      transform-origin: left;
+      transition: transform .25s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { transform: scaleX(1); } /* révèle le soulignement */
+
+    /* Bouton "Me contacter" dans la nav */
+    .nav-contact-btn {
+      padding: .45rem 1.1rem;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--c1), var(--c5));
+      color: #fff;
+      border: none;
+      cursor: none;
+      font-family: var(--fb);
+      font-size: .78rem;
+      font-weight: 500;
+      transition: opacity .2s, transform .15s;
+    }
+    .nav-contact-btn:hover { opacity: .85; transform: translateY(-1px); }
+
+
+    /* ============================================================
+       6. SECTION HERO (PAGE D'ACCUEIL)
+       Occupe 100% de la hauteur de l'écran. Contient plusieurs
+       couches visuelles superposées : orbes, grille, particules,
+       puis le contenu (texte + carte flottante).
+    ============================================================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 8rem 3rem 4rem; /* 8rem en haut pour laisser place à la nav fixe */
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* -----------------------------------------------------------
+       ORBES LUMINEUX — 3 cercles flous colorés en arrière-plan
+       Chacun a une taille, position et délai d'animation différents
+       pour créer un effet de profondeur organique.
+    ----------------------------------------------------------- */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);       /* flou intense = lumière douce */
+      pointer-events: none;
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(108,59,255,.22) 0%, transparent 70%);
+      top: -150px; right: -100px; /* dépasse en haut à droite */
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,92,122,.15) 0%, transparent 70%);
+      bottom: -100px; left: 5%;  /* dépasse en bas à gauche */
+      animation-delay: -3s;      /* démarre à -3s pour désynchroniser */
+    }
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(0,212,170,.12) 0%, transparent 70%);
+      top: 30%; left: 40%;       /* au centre de la page */
+      animation-delay: -6s;
+    }
+
+    /* Flottement des orbes : léger déplacement + variation de taille */
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33%       { transform: translate(30px, -20px) scale(1.05); }
+      66%       { transform: translate(-20px, 15px) scale(.97); }
+    }
+
+    /* -----------------------------------------------------------
+       GRILLE DE FOND
+       Lignes violet très transparentes formant un quadrillage.
+       Le mask-image crée un fondu en ellipse au centre.
+    ----------------------------------------------------------- */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(108,59,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(108,59,255,.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+      /* fondu radial : visible au centre, transparent sur les bords */
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    /* -----------------------------------------------------------
+       PARTICULES FLOTTANTES
+       Petits points colorés qui montent lentement (gérés par JS).
+       Le CSS définit l'animation de dérive vers le haut.
+    ----------------------------------------------------------- */
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--c1);
+      border-radius: 50%;
+      animation: particleDrift linear infinite;
+      opacity: 0; /* invisible par défaut, l'animation gère l'apparition */
+    }
+
+    @keyframes particleDrift {
+      0%   { transform: translateY(0) translateX(0);    opacity: 0; }
+      10%  { opacity: .6; }                              /* apparition progressive */
+      90%  { opacity: .3; }                              /* disparition progressive */
+      100% { transform: translateY(-120vh) translateX(40px); opacity: 0; }
+    }
+
+    /* Contenu héro (titre + description + boutons) */
+    .hero-content {
+      position: relative;
+      z-index: 2;      /* au-dessus des orbes et de la grille */
+      max-width: 700px;
+    }
+
+    /* Badge "BTS SIO — Option SISR" avec bordure arrondie */
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108,59,255,.12);
+      border: 1px solid rgba(108,59,255,.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: .75rem;
+      color: #A98BFF;
+      margin-bottom: 2rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      animation: fadeInDown .8s ease both; /* entrée depuis le haut */
+    }
+
+    /* Petit point vert clignotant "disponible" */
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--c3);
+      box-shadow: 0 0 0 0 rgba(0,212,170,.4);
+      animation: statusPulse 2s infinite;
+    }
+
+    /* Effet de pulsation en anneau expansif */
+    @keyframes statusPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(0,212,170,.4); }
+      70%  { box-shadow: 0 0 0 8px rgba(0,212,170,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,212,170,0); }
+    }
+
+    /* Titre principal h1 — taille responsive avec clamp() */
+    h1.hero-name {
+      font-family: var(--fh);
+      font-weight: 800;
+      font-size: clamp(2.8rem, 6.5vw, 5.5rem); /* min / préféré / max */
+      line-height: 1.0;
+      margin-bottom: 1.4rem;
+      animation: fadeInUp .9s ease .1s both; /* entrée depuis le bas, délai 0.1s */
+    }
+
+    .line1 { display: block; color: var(--text); } /* "ABAKAR" en blanc */
+
+    /* "ADOUM KELLÉ" en dégradé multicolore avec lueur */
+    .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 45%, var(--c4) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 40px rgba(108,59,255,.4));
+    }
+
+    /* Description sous le titre */
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 540px;
+      margin-bottom: 2.5rem;
+      animation: fadeInUp .9s ease .25s both; /* délai légèrement plus long */
+    }
+    .hero-desc strong { color: var(--text); font-weight: 500; }
+
+    /* Conteneur des deux boutons CTA */
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeInUp .9s ease .4s both;
+    }
+
+    /* Bouton principal avec effet shimmer (reflet lumineux au survol) */
+    .btn-primary {
+      padding: .8rem 2rem;
+      border-radius: 8px;
+      border: none;
+      cursor: none;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      color: #fff;
+      font-family: var(--fb);
+      font-size: .9rem;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 24px rgba(108,59,255,.3);
+    }
+
+    /* Pseudo-élément pour le reflet lumineux (shimmer) */
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,.1) 50%, transparent 70%);
+      transform: translateX(-100%); /* caché à gauche par défaut */
+      transition: transform .5s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108,59,255,.45); }
+    .btn-primary:hover::before { transform: translateX(100%); } /* glisse vers la droite */
+
+    /* Bouton secondaire — contour transparent */
+    .btn-sec {
+      padding: .8rem 2rem;
+      border-radius: 8px;
+      cursor: none;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--text);
+      font-family: var(--fb);
+      font-size: .9rem;
+      transition: border-color .25s, background .25s, transform .2s;
+    }
+    .btn-sec:hover {
+      border-color: rgba(255,255,255,.3);
+      background: rgba(255,255,255,.05);
+      transform: translateY(-2px);
+    }
+
+    /* -----------------------------------------------------------
+       CARTE FLOTTANTE (hero-card)
+       Affichée à droite sur desktop. Contient les barres de
+       compétences clés. Disparaît sur mobile (media query).
+    ----------------------------------------------------------- */
+    .hero-card {
+      position: absolute;
+      right: 4rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(23,23,38,.9);
+      border: 1px solid rgba(108,59,255,.2);
+      border-radius: 18px;
+      padding: 1.6rem;
+      width: 230px;
+      z-index: 2;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 0 40px rgba(108,59,255,.1);
+      animation: fadeInRight 1s ease .5s both; /* entrée depuis la droite */
+    }
+
+    /* Dégradé subtil interne pour la profondeur */
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(108,59,255,.05), rgba(255,92,122,.03));
+      pointer-events: none;
+    }
+
+    /* Label "Compétences clés" en haut de la carte */
+    .fc-title { font-size: .68rem; color: var(--muted2); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1.1rem; }
+
+    /* Ligne stat : label à gauche, pourcentage à droite */
+    .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: .55rem; }
+    .sl { font-size: .8rem; color: var(--muted); }
+    .sv { font-family: var(--fh); font-size: .9rem; font-weight: 700; }
+
+    /* Barre de compétence dans la hero-card */
+    .skbar {
+      height: 3px;
+      border-radius: 100px;
+      background: rgba(255,255,255,.06); /* fond gris de la barre */
+      margin-bottom: .9rem;
+      overflow: hidden;
+    }
+
+    /* Remplissage de la barre — animé via JS (classe .animated) */
+    .skfill {
+      height: 100%;
+      border-radius: 100px;
+      transform: scaleX(0);             /* départ : invisible */
+      transform-origin: left;
+      transition: transform 1.2s cubic-bezier(.16,1,.3,1); /* ressort */
+    }
+    .skfill.animated { transform: scaleX(1); } /* déclenchement par JS */
+
+
+    /* ============================================================
+       7. STYLES COMMUNS AUX SECTIONS
+       Chaque section partage ces styles de base pour l'espacement,
+       les labels, les titres et l'animation de révélation au scroll.
+    ============================================================ */
+    section { padding: 5rem 3rem; position: relative; }
+
+    /* Conteneur centré avec largeur maximale */
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    /* Petit label en haut des sections (ex: "Qui suis-je") */
+    .s-label {
+      font-size: .72rem;
+      color: var(--c3);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      margin-bottom: .5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    /* Trait horizontal avant le label */
+    .s-label::before { content: ''; display: block; width: 20px; height: 1px; background: var(--c3); }
+
+    /* Titre de section */
+    .s-title {
+      font-family: var(--fh);
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      font-weight: 800;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    /* -----------------------------------------------------------
+       ANIMATION DE RÉVÉLATION AU SCROLL
+       Les éléments avec .reveal démarrent invisibles et décalés.
+       IntersectionObserver (JS) ajoute .visible quand ils entrent
+       dans le viewport.
+    ----------------------------------------------------------- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px); /* légèrement en dessous */
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Délais échelonnés pour les animations en cascade */
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .2s; }
+    .reveal-delay-3 { transition-delay: .3s; }
+    .reveal-delay-4 { transition-delay: .4s; }
+
+
+    /* ============================================================
+       8. SECTION "À PROPOS"
+       Fond alterné (--surface). Trait lumineux en haut de section.
+       Grille 2 colonnes : texte + stats chiffrées.
+    ============================================================ */
+    .about-section { background: var(--surface); }
+
+    /* Trait dégradé en haut de la section */
+    .about-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--c1), transparent);
+    }
+
+    /* Grille 2 colonnes : texte (plus large) | stats */
+    .about-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+
+    .about-text { color: var(--muted); line-height: 1.85; font-size: .95rem; }
+    .about-text strong { color: var(--text); font-weight: 500; }
+    .about-text p + p { margin-top: 1rem; }
+
+    /* Tags compétences (badges arrondis) */
+    .about-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.4rem; }
+    .tag {
+      padding: 5px 13px;
+      border-radius: 100px;
+      font-size: .76rem;
+      background: rgba(108,59,255,.1);
+      border: 1px solid rgba(108,59,255,.22);
+      color: #A98BFF;
+      transition: background .2s, border-color .2s;
+    }
+    .tag:hover { background: rgba(108,59,255,.2); border-color: rgba(108,59,255,.4); }
+
+    /* Grille 2x2 de stats chiffrées */
+    .stats-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .sm {
+      background: var(--surface2);
+      border-radius: 14px;
+      padding: 1.2rem;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.05);
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s, border-color .3s;
+    }
+    .sm:hover { transform: translateY(-3px); }
+
+    /* Trait coloré en bas de chaque stat — couleur différente par enfant */
+    .sm::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
+    .sm:nth-child(1)::before { background: linear-gradient(90deg, var(--c1), var(--c2)); }
+    .sm:nth-child(2)::before { background: linear-gradient(90deg, var(--c2), var(--c4)); }
+    .sm:nth-child(3)::before { background: linear-gradient(90deg, var(--c3), var(--c1)); }
+    .sm:nth-child(4)::before { background: linear-gradient(90deg, var(--c4), var(--c5)); }
+    .sm:hover { border-color: rgba(255,255,255,.12); }
+
+    /* Chiffre principal de la stat, en dégradé de texte */
+    .sm-val {
+      font-family: var(--fh);
+      font-size: 2rem;
+      font-weight: 800;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .sm-label { font-size: .74rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+
+    /* ============================================================
+       9. SECTION COMPÉTENCES
+       Grille auto-responsive de cartes. Chaque carte dispose d'un
+       trait coloré en haut qui s'étend au survol, et d'une barre
+       de progression animée au scroll.
+    ============================================================ */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+
+    .sk {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 1.3rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s, transform .3s, box-shadow .3s;
+      cursor: default;
+    }
+
+    /* Trait coloré en haut de la carte — masqué par défaut */
+    .sk::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .4s ease;
+    }
+    .sk:hover::before { transform: scaleX(1); } /* révèle le trait au survol */
+    .sk:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+
+    /* Couleur du trait et de la bordure survol — unique par carte */
+    .sk:nth-child(1)::before { background: linear-gradient(90deg,var(--c1),var(--c2)); }
+    .sk:nth-child(2)::before { background: linear-gradient(90deg,var(--c2),var(--c4)); }
+    .sk:nth-child(3)::before { background: linear-gradient(90deg,var(--c3),var(--c1)); }
+    .sk:nth-child(4)::before { background: linear-gradient(90deg,var(--c4),var(--c5)); }
+    .sk:nth-child(5)::before { background: linear-gradient(90deg,var(--c1),var(--c3)); }
+    .sk:nth-child(6)::before { background: linear-gradient(90deg,var(--c5),var(--c2)); }
+
+    .sk:nth-child(1):hover { border-color: rgba(108,59,255,.35); }
+    .sk:nth-child(2):hover { border-color: rgba(255,92,122,.35); }
+    .sk:nth-child(3):hover { border-color: rgba(0,212,170,.35); }
+    .sk:nth-child(4):hover { border-color: rgba(255,154,60,.35); }
+    .sk:nth-child(5):hover { border-color: rgba(108,59,255,.35); }
+    .sk:nth-child(6):hover { border-color: rgba(200,64,233,.35); }
+
+    .sk-icon { font-size: 1.6rem; margin-bottom: .6rem; }
+    .sk-name { font-family: var(--fh); font-size: .88rem; font-weight: 700; margin-bottom: .35rem; }
+    .sk-desc { font-size: .76rem; color: var(--muted); line-height: 1.5; }
+
+    /* Barre de compétence (même logique que .skbar/.skfill dans le hero) */
+    .sk-bar { height: 3px; border-radius: 100px; background: rgba(255,255,255,.06); margin-top: .9rem; overflow: hidden; }
+    .sk-prog {
+      height: 100%; border-radius: 100px;
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 1.3s cubic-bezier(.16,1,.3,1);
+    }
+    .sk-prog.animated { transform: scaleX(1); } /* déclenché par IntersectionObserver */
+
+
+    /* ============================================================
+       10. SECTION STAGE
+       Fond alterné --surface. Carte principale avec trait coloré
+       en haut, missions en grille 2 colonnes + bloc sécurité.
+    ============================================================ */
+    .stage-section { background: var(--surface); }
+    .stage-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--c3), transparent);
+    }
+
+    .stage-card {
+      background: var(--surface2);
+      border: 1px solid rgba(0,212,170,.15);
+      border-radius: 20px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Trait 3 couleurs en haut de la carte stage */
+    .stage-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--c3), var(--c1), var(--c2));
+    }
+
+    /* En-tête : nom entreprise + badge */
+    .stage-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;
+    }
+    .stage-co {
+      font-family: var(--fh); font-size: 1.5rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--c3), var(--c1));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stage-role { font-size: .88rem; color: var(--muted); margin-top: .3rem; }
+
+    /* Badge vert "Stage validé" */
+    .stage-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,212,170,.1); border: 1px solid rgba(0,212,170,.25);
+      border-radius: 100px; padding: 6px 16px;
+      font-size: .75rem; color: var(--c3); white-space: nowrap;
+    }
+
+    /* Bloc des missions avec séparateur label */
+    .missions-block { margin-bottom: 2rem; }
+    .missions-label {
+      font-size: .74rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    /* Trait extensible après le label missions */
+    .missions-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.06); }
+
+    /* Grille 2 colonnes pour les items de mission */
+    .missions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+
+    /* Chaque item de mission */
+    .mission-item {
+      display: flex; align-items: flex-start; gap: .7rem;
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.05);
+      border-radius: 10px; padding: .85rem;
+      transition: border-color .2s, background .2s, transform .2s;
+    }
+    /* Glissement vers la droite au survol */
+    .mission-item:hover {
+      border-color: rgba(0,212,170,.2);
+      background: rgba(0,212,170,.04);
+      transform: translateX(3px);
+    }
+
+    .m-icon { font-size: .95rem; flex-shrink: 0; margin-top: 1px; }
+    .m-text { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+    .m-text strong { color: var(--text); display: block; font-size: .84rem; margin-bottom: 2px; font-weight: 500; }
+
+    /* Bloc tâches sécurité (en dessous des missions, séparé par un trait) */
+    .secu-block { border-top: 1px solid rgba(255,255,255,.06); padding-top: 1.5rem; }
+
+    .secu-item {
+      display: flex; align-items: flex-start; gap: .7rem;
+      background: rgba(255,92,122,.04); border: 1px solid rgba(255,92,122,.12);
+      border-radius: 10px; padding: .85rem; max-width: 450px;
+      transition: border-color .2s, background .2s;
+    }
+    .secu-item:hover { border-color: rgba(255,92,122,.3); background: rgba(255,92,122,.08); }
+
+
+    /* ============================================================
+       11. SECTION LAB PERSONNEL
+       Topologie des VMs en grille + bandeau PingCastle.
+       Chaque nœud a une couleur de survol différente selon son rôle.
+    ============================================================ */
+    .lab-card {
+      background: var(--surface);
+      border: 1px solid rgba(255,92,122,.15);
+      border-radius: 20px; padding: 2.5rem;
+      position: relative; overflow: hidden;
+    }
+    .lab-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--c2), var(--c4), var(--c5));
+    }
+
+    .lab-subtitle { font-size: .88rem; color: var(--muted); margin-bottom: 2rem; line-height: 1.6; }
+    .lab-subtitle strong { color: var(--text); }
+
+    /* Grille des nœuds VM — s'adapte automatiquement à la largeur */
+    .topo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+
+    /* Carte d'un nœud VM */
+    .topo-node {
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; padding: 1.1rem .8rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+      transition: transform .3s, border-color .3s, box-shadow .3s;
+      cursor: default;
+    }
+    .topo-node:hover { transform: translateY(-4px) scale(1.02); }
+
+    /* Halo lumineux interne au survol */
+    .topo-node::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at center, rgba(108,59,255,.08), transparent 70%);
+      opacity: 0; transition: opacity .3s;
+    }
+    .topo-node:hover::after { opacity: 1; }
+
+    .tn-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+    .tn-name { font-family: var(--fh); font-size: .78rem; font-weight: 700; margin-bottom: .2rem; }
+    .tn-role { font-size: .68rem; color: var(--muted); line-height: 1.3; }
+
+    /* Badge "PingCastle ✓" sur le nœud AD */
+    .tn-badge {
+      display: inline-block; margin-top: .4rem; padding: 2px 7px;
+      border-radius: 4px; font-size: .62rem;
+      background: rgba(255,154,60,.15); color: #FFB56B;
+      border: 1px solid rgba(255,154,60,.25);
+    }
+
+    /* Couleurs de survol spécifiques selon le type de VM */
+    .topo-node.node-pfsense:hover { border-color: rgba(255,92,122,.4); box-shadow: 0 8px 24px rgba(255,92,122,.2); }
+    .topo-node.node-ad            { border-color: rgba(255,154,60,.25); background: rgba(255,154,60,.04); } /* toujours actif */
+    .topo-node.node-ad:hover      { border-color: rgba(255,154,60,.4);  box-shadow: 0 8px 24px rgba(255,154,60,.2); }
+    .topo-node.node-kali:hover    { border-color: rgba(200,64,233,.4);  box-shadow: 0 8px 24px rgba(200,64,233,.2); }
+    .topo-node.node-meta:hover    { border-color: rgba(255,92,122,.4);  box-shadow: 0 8px 24px rgba(255,92,122,.15); }
+    .topo-node.node-glpi:hover    { border-color: rgba(0,212,170,.4);   box-shadow: 0 8px 24px rgba(0,212,170,.15); }
+    .topo-node.node-db:hover      { border-color: rgba(108,59,255,.4);  box-shadow: 0 8px 24px rgba(108,59,255,.15); }
+    .topo-node.node-client:hover  { border-color: rgba(108,59,255,.4); }
+
+    /* Bandeau explicatif PingCastle */
+    .pingcastle-banner {
+      background: rgba(255,154,60,.07); border: 1px solid rgba(255,154,60,.2);
+      border-radius: 12px; padding: 1.2rem 1.5rem;
+      display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .pc-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+    .pc-title { font-size: .9rem; font-weight: 500; color: #FFB56B; margin-bottom: .3rem; }
+    .pc-desc { font-size: .81rem; color: var(--muted); line-height: 1.6; }
+    .pc-desc strong { color: var(--text); }
+
+
+    /* ============================================================
+       12. SECTION CERTIFICATIONS
+       Même logique que "À propos" : fond --surface + trait coloré.
+       Grille de cartes avec icône colorée + texte.
+    ============================================================ */
+    .certs-section { background: var(--surface); }
+    .certs-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--c4), transparent);
+    }
+
+    .certs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+
+    .cert-card {
+      background: var(--surface2); border: 1px solid rgba(255,255,255,.06);
+      border-radius: 14px; padding: 1.2rem;
+      display: flex; align-items: flex-start; gap: .9rem;
+      transition: transform .3s, border-color .3s, box-shadow .3s;
+    }
+    .cert-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.14); box-shadow: 0 8px 32px rgba(0,0,0,.3); }
+
+    .cert-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 1.1rem;
+    }
+    .cert-name  { font-size: .88rem; font-weight: 500; margin-bottom: .2rem; }
+    .cert-org   { font-size: .76rem; color: var(--muted); }
+
+    /* Badges de statut de certification */
+    .cert-status {
+      display: inline-block; margin-top: .4rem;
+      padding: 2px 8px; border-radius: 4px; font-size: .68rem;
+    }
+    .status-ongoing { background: rgba(255,154,60,.12); color: #FFB56B; border: 1px solid rgba(255,154,60,.2); }
+    .status-done    { background: rgba(0,212,170,.1);    color: var(--c3); border: 1px solid rgba(0,212,170,.2); }
+
+
+    /* ============================================================
+       13. SECTION CONTACT
+       Carte de contact avec trait dégradé 3 couleurs en haut.
+       Liens cliquables avec animation de glissement au survol.
+    ============================================================ */
+    .contact-section { overflow: hidden; }
+
+    .contact-wrap {
+      background: var(--surface); border: 1px solid rgba(108,59,255,.2);
+      border-radius: 20px; padding: 2.5rem; max-width: 520px;
+      position: relative; overflow: hidden;
+      transition: box-shadow .3s;
+    }
+    .contact-wrap:hover { box-shadow: 0 20px 60px rgba(108,59,255,.15); }
+    .contact-wrap::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--c1), var(--c5), var(--c2));
+    }
+
+    .ct-title { font-family: var(--fh); font-size: 1.4rem; font-weight: 800; margin-bottom: .4rem; }
+    .ct-sub   { color: var(--muted); font-size: .88rem; margin-bottom: 1.6rem; line-height: 1.6; }
+
+    .contact-links { display: flex; flex-direction: column; gap: .8rem; }
+
+    /* Lien de contact individuel */
+    .cl {
+      display: flex; align-items: center; gap: .9rem;
+      padding: .8rem 1.1rem;
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 10px; text-decoration: none; color: var(--text);
+      transition: border-color .25s, background .25s, transform .2s;
+      font-size: .88rem;
+    }
+    .cl:hover { border-color: rgba(108,59,255,.4); background: rgba(108,59,255,.07); transform: translateX(4px); }
+
+    .cl-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; font-weight: 600; }
+    .cl-text  { flex: 1; }
+    .cl-arrow { font-size: .75rem; color: var(--muted); transition: transform .2s; }
+    .cl:hover .cl-arrow { transform: translateX(3px); } /* flèche glisse vers la droite */
+
+
+    /* ============================================================
+       14. FOOTER
+    ============================================================ */
+    footer {
+      text-align: center; padding: 2rem 3rem;
+      font-size: .78rem; color: var(--muted2);
+      border-top: 1px solid rgba(255,255,255,.05);
+      position: relative;
+    }
+    /* Trait lumineux centré en haut du footer */
+    footer::before {
+      content: '';
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 200px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--c1), transparent);
+    }
+    footer span { color: var(--c2); } /* Nom en rose */
+
+
+    /* ============================================================
+       15. KEYFRAMES D'ANIMATION
+    ============================================================ */
+
+    /* Entrée depuis le haut (hero-tag) */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Entrée depuis le bas (titres, description, boutons) */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Entrée depuis la droite (hero-card) — garde le translateY(-50%) initial */
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateY(-50%) translateX(30px); }
+      to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+    }
+
+
+    /* ============================================================
+       16b. PHOTO DE PROFIL — OPTION A (fichier externe)
+       .hero-photo-wrap  : cadre circulaire avec bordure dégradée animée
+       .hero-photo       : la balise <img> elle-même (cercle parfait)
+       .hero-photo-badge : badge "SISR" en bas à droite de la photo
+       .nav-avatar       : mini cercle 34px dans la barre de navigation
+       .btn-sec-link     : reset du lien autour du bouton CV
+    ============================================================ */
+
+    /* Reset du lien autour du bouton CV (enlève soulignement etc.) */
+    .btn-sec-link {
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    /* Conteneur principal de la photo dans le hero */
+    .hero-photo-wrap {
+      position: relative;
+      width: 155px;
+      height: 155px;
+      margin-bottom: 1.6rem; /* espace avant le badge BTS SIO */
+      animation: fadeInUp .9s ease .05s both; /* apparition vers le haut */
+    }
+
+    /*
+      Anneau dégradé animé qui entoure la photo.
+      Utilise un pseudo-élément ::before légèrement plus grand que la photo.
+      Le dégradé tourne en continu grâce à background-position.
+    */
+    .hero-photo-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -3px; /* 3px de débordement = épaisseur de l'anneau */
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--c1), var(--c2), var(--c3), var(--c1));
+      background-size: 300% 300%;
+      animation: gradientSpin 4s linear infinite; /* rotation du dégradé */
+      z-index: 0;
+    }
+
+    /* Rotation continue du dégradé de l'anneau */
+    @keyframes gradientSpin {
+      0%   { background-position: 0%   50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0%   50%; }
+    }
+
+    /* La photo elle-même : cercle parfait, recadré sur le visage */
+    .hero-photo {
+      position: relative;
+      z-index: 1;           /* passe devant l'anneau ::before */
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;        /* recadre sans déformer l'image */
+      object-position: center top; /* centre sur le haut (visage) */
+      border: 3px solid var(--bg); /* espace sombre entre photo et anneau */
+      display: block;
+    }
+
+    /* Badge "SISR" superposé en bas à droite de la photo */
+    .hero-photo-badge {
+      position: absolute;
+      bottom: 6px;
+      right: 2px;
+      z-index: 2;
+      background: linear-gradient(135deg, var(--c1), var(--c5));
+      border: 2px solid var(--bg);
+      border-radius: 100px;
+      padding: 3px 10px;
+      font-size: .62rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    /* Mini avatar circulaire dans la barre de navigation */
+    .nav-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top; /* cadre sur le visage */
+      border: 2px solid rgba(108,59,255,0.45); /* bordure violet douce */
+      transition: border-color .25s, transform .2s;
+      cursor: none;
+      flex-shrink: 0;
+      margin-left: .5rem;
+    }
+    .nav-avatar:hover {
+      border-color: var(--c2); /* rose au survol */
+      transform: scale(1.08);
+    }
+
+    /* ============================================================
+       16. RESPONSIVE — MOBILE / TABLETTE
+       Supprime les éléments trop larges et réorganise les grilles
+       en une seule colonne pour les petits écrans.
+    ============================================================ */
+    @media (max-width: 900px) {
+      .hero-card      { display: none; }         /* cache la carte flottante */
+      .about-grid     { grid-template-columns: 1fr; }
+      .missions-grid  { grid-template-columns: 1fr; }
+      nav             { padding: .9rem 1.5rem; }
+      section         { padding: 3.5rem 1.5rem; }
+      .hero           { padding: 7rem 1.5rem 3rem; }
+      .nav-links      { gap: 1.2rem; }
+    }
+
+    @media (max-width: 600px) {
+      .nav-links      { display: none; }         /* cache les liens nav sur mobile */
+      h1.hero-name    { font-size: 2.4rem; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       CURSEUR PERSONNALISÉ
+       Deux divs superposés positionnés par JavaScript :
+       - #cursor      : point central (suit la souris en temps réel)
+       - #cursor-ring : anneau avec inertie (suit avec un léger retard)
+  ============================================================ -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+
+  <!-- ============================================================
+       NAVIGATION FIXE
+       Reste visible en haut pendant le scroll.
+       La classe .scrolled est ajoutée par JS au-delà de 60px.
+  ============================================================ -->
+  <nav id="nav">
+    <div class="nav-logo">AAK • Portfolio SISR</div>
+    <ul class="nav-links">
+      <li><a href="#about">À propos</a></li>
+      <li><a href="#skills">Compétences</a></li>
+      <li><a href="#stage">Stage</a></li>
+      <li><a href="#lab">Lab</a></li>
+      <li><a href="#certs">Formations</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <!-- Bouton qui scrolle directement vers la section contact -->
+    <button class="nav-contact-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+      Me contacter
+    </button>
+
+    <!--
+      MINI AVATAR DANS LA NAV — FICHIER EXTERNE
+      ➜ Place ta photo dans le même dossier que index.html
+        et nomme-la exactement : photo_abakar.jpg
+      onerror : masque l'image automatiquement si le fichier est introuvable
+    -->
+    <img
+      src="photo_abakar.jpeg"
+      alt="ABAKAR ADOUM KELLE"
+      class="nav-avatar"
+      title="ABAKAR ADOUM KELLÉ — BTS SIO SISR"
+      onerror="this.style.display='none'"
+    >
+
+  </nav>
+
+
+  <!-- ============================================================
+       SECTION HERO — PAGE D'ACCUEIL
+       Structure en couches :
+       1. Orbes lumineux (.orb-1/2/3) — arrière-plan flou animé
+       2. Grille (.hero-grid) — quadrillage violet transparent
+       3. Particules (#particles) — points colorés générés par JS
+       4. Contenu (.hero-content) — texte + boutons
+       5. Carte flottante (.hero-card) — stats de compétences
+  ============================================================ -->
+  <section class="hero" id="home">
+
+    <!-- Orbes lumineux flottants (animation CSS orbFloat) -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Grille de fond avec fondu radial -->
+    <div class="hero-grid"></div>
+
+    <!-- Conteneur des particules flottantes (remplies par JS) -->
+    <div id="particles"></div>
+
+    <!-- Contenu principal du hero -->
+    <div class="hero-content">
+
+      <!--
+        PHOTO DE PROFIL DANS LE HERO — FICHIER EXTERNE
+        ➜ Place ta photo dans le même dossier que index.html
+          et nomme-la exactement : photo_abakar.jpg
+        Le cadre circulaire avec bordure dégradée animée est géré par CSS (.hero-photo-wrap).
+        onerror : masque toute la div photo si le fichier est introuvable.
+      -->
+      <div class="hero-photo-wrap">
+        <img
+          src="photo_abakar.jpeg"
+          alt="ABAKAR ADOUM KELLE"
+          class="hero-photo"
+          onerror="this.parentElement.style.display='none'"
+        >
+        <!-- Badge SISR superposé en bas à droite de la photo -->
+        <span class="hero-photo-badge">SISR</span>
+      </div>
+
+      <!-- Badge statut avec point vert clignotant -->
+      <div class="hero-tag">
+        <span class="status-dot"></span>
+        BTS SIO — Option SISR
+      </div>
+
+      <!-- Titre h1 : "ABAKAR" en blanc + "ADOUM KELLÉ" en dégradé avec typewriter JS -->
+      <h1 class="hero-name">
+        <span class="line1">ABAKAR</span>
+        <span class="line2">ADOUM KELLE</span>
+        <!-- La ligne 2 est vidée puis remplie lettre par lettre par le JS (typewriter) -->
+      </h1>
+
+      <!-- Description courte -->
+      <p class="hero-desc">
+        Étudiant en <strong>BTS SIO option SISR</strong>, à
+        <strong>MyDigitalSchool d'Angers</strong>. Passionné par les réseaux, la cybersécurité et l'administration système —
+        je construis et audite mes propres infrastructures virtuelles.
+      </p>
+
+      <!-- Boutons d'action -->
+      <div class="hero-btns">
+        <!-- Scroll vers la section stage -->
+        <button class="btn-primary" onclick="document.getElementById('stage').scrollIntoView({behavior:'smooth'})">
+          Voir mon stage →
+        </button>
+        <!-- Le bouton pointe vers ton fichier CV externe -->
+<a href="cv_Abakar Adoum Kelle.pdf" download="cv_Abakar Adoum Kelle.pdf">
+  <button class="btn-sec">Télécharger mon CV</button>
+</a>
+        </button>
+      </div>
+
+    </div><!-- /.hero-content -->
+
+    <!-- Carte flottante à droite (cachée sur mobile) -->
+    <div class="hero-card">
+      <div class="fc-title">Compétences clés</div>
+
+      <!-- Chaque ligne = label + pourcentage + barre animée -->
+      <div class="stat-row">
+        <span class="sl">Maintenance IT</span>
+        <span class="sv" style="color:#A98BFF">92%</span>
+      </div>
+      <div class="skbar">
+        <div class="skfill" style="background:linear-gradient(90deg,var(--c1),var(--c2));width:92%"></div>
+      </div>
+
+      <div class="stat-row">
+        <span class="sl">Réseaux</span>
+        <span class="sv" style="color:#FF7891">80%</span>
+      </div>
+      <div class="skbar">
+        <div class="skfill" style="background:linear-gradient(90deg,var(--c2),var(--c4));width:80%"></div>
+      </div>
+
+      <div class="stat-row">
+        <span class="sl">Sécurité AD</span>
+        <span class="sv" style="color:#00D4AA">75%</span>
+      </div>
+      <div class="skbar">
+        <div class="skfill" style="background:linear-gradient(90deg,var(--c3),var(--c1));width:75%"></div>
+      </div>
+
+      <div class="stat-row">
+        <span class="sl">Virtualisation</span>
+        <span class="sv" style="color:#FFB56B">82%</span>
+      </div>
+      <div class="skbar" style="margin-bottom:0">
+        <div class="skfill" style="background:linear-gradient(90deg,var(--c4),var(--c5));width:82%"></div>
+      </div>
+    </div><!-- /.hero-card -->
+
+  </section><!-- /#home -->
+
+
+  <!-- ============================================================
+       SECTION À PROPOS
+       Présentation personnelle + 4 statistiques chiffrées.
+       Les éléments avec .reveal s'animent au scroll via JS.
+  ============================================================ -->
+  <section id="about" class="about-section">
+    <div class="section-inner">
+
+      <!-- Label et titre de section -->
+      <div class="s-label reveal">Qui suis-je</div>
+      <div class="s-title reveal reveal-delay-1">À propos de moi</div>
+
+      <div class="about-grid">
+
+        <!-- Colonne gauche : texte + tags -->
+        <div class="reveal reveal-delay-2">
+          <p class="about-text">
+            Je suis <strong>ABAKAR ADOUM KELLÉ</strong>, étudiant en <strong>BTS SIO option SISR</strong>
+            (Solutions d'Infrastructure, Systèmes et Réseaux). J'ai effectué un stage chez <strong>Info2R</strong>
+            en tant que technicien de maintenance informatique, où j'ai acquis une expérience concrète sur des
+            interventions matérielles et logicielles variées.
+          </p>
+          <p class="about-text" style="margin-top:1rem">
+            En parallèle, je développe un <strong>lab personnel complet</strong> avec des machines virtuelles :
+            AD, pfSense, GLPI, Kali Linux, Metasploitable... jusqu'à l'audit de sécurité Active Directory avec
+            <strong>PingCastle</strong>. Une approche offensive et défensive qui me passionne au quotidien.
+          </p>
+          <!-- Tags compétences -->
+          <div class="about-tags">
+            <span class="tag">Technicien IT</span>
+            <span class="tag">Admin réseau</span>
+            <span class="tag">Sécurité AD</span>
+            <span class="tag">Linux / Windows</span>
+            <span class="tag">Virtualisation</span>
+            <span class="tag">Pentest</span>
+          </div>
+        </div>
+
+        <!-- Colonne droite : grille 2x2 de stats chiffrées -->
+        <div class="stats-mini reveal reveal-delay-3">
+          <div class="sm">
+            <div class="sm-val" style="background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">1</div>
+            <div class="sm-label">Stage réalisé<br>Info2R</div>
+          </div>
+          <div class="sm">
+            <div class="sm-val" style="background:linear-gradient(135deg,var(--c2),var(--c4));-webkit-background-clip:text;-webkit-text-fill-color:transparent">8</div>
+            <div class="sm-label">VMs dans<br>mon lab</div>
+          </div>
+          <div class="sm">
+            <div class="sm-val" style="background:linear-gradient(135deg,var(--c3),var(--c1));-webkit-background-clip:text;-webkit-text-fill-color:transparent">2</div>
+            <div class="sm-label">OS maîtrisés<br>Linux & Windows</div>
+          </div>
+          <div class="sm">
+            <div class="sm-val" style="background:linear-gradient(135deg,var(--c4),var(--c5));-webkit-background-clip:text;-webkit-text-fill-color:transparent">BTS</div>
+            <div class="sm-label">SIO — SISR<br>En cours</div>
+          </div>
+        </div>
+
+      </div><!-- /.about-grid -->
+    </div><!-- /.section-inner -->
+  </section><!-- /#about -->
+
+
+  <!-- ============================================================
+       SECTION COMPÉTENCES TECHNIQUES
+       6 cartes en grille responsive. Chaque carte contient :
+       - une icône emoji
+       - un nom + description de la compétence
+       - une barre de niveau animée au scroll (via IntersectionObserver)
+       L'attribut data-width sur .sk-prog donne la largeur cible
+       mais c'est la propriété width inline qui est utilisée ici.
+  ============================================================ -->
+  <section id="skills" class="skills-section">
+    <div class="section-inner">
+      <div class="s-label reveal">Savoir-faire</div>
+      <div class="s-title reveal reveal-delay-1">Compétences techniques</div>
+      <div class="skills-grid">
+
+        <!-- Carte 1 : Maintenance matérielle -->
+        <div class="sk reveal reveal-delay-1">
+          <div class="sk-icon">🔧</div>
+          <div class="sk-name">Maintenance matérielle</div>
+          <div class="sk-desc">Remplacement dalle, RAM, disque dur, clavier, pâte thermique processeur</div>
+          <div class="sk-bar">
+            <div class="sk-prog" style="background:linear-gradient(90deg,var(--c1),var(--c2));width:92%"></div>
+          </div>
+        </div>
+
+        <!-- Carte 2 : Installation d'OS -->
+        <div class="sk reveal reveal-delay-2">
+          <div class="sk-icon">💿</div>
+          <div class="sk-name">Installation d'OS</div>
+          <div class="sk-desc">Déploiement Linux (Debian/Ubuntu/Kali) et Windows, configuration post-install</div>
+          <div class="sk-bar">
+            <div class="sk-prog" style="background:linear-gradient(90deg,var(--c2),var(--c4));width:88%"></div>
+          </div>
+        </div>
+
+        <!-- Carte 3 : Sécurité Windows / AD -->
+        <div class="sk reveal reveal-delay-3">
+          <div class="sk-icon">🛡️</div>
+          <div class="sk-name">Sécurité Windows / AD</div>
+          <div class="sk-desc">Récupération de mot de passe, audit AD PingCastle, GPO, gestion des comptes</div>
+          <div class="sk-bar">
+            <div class="sk-prog" style="background:linear-gradient(90deg,var(--c3),var(--c1));width:75%"></div>
+          </div>
+        </div>
+
+        <!-- Carte 4 : Réseaux & pfSense -->
+        <div class="sk reveal reveal-delay-1">
+          <div class="sk-icon">🌐</div>
+          <div class="sk-name">Réseaux & pfSense</div>
+          <div class="sk-desc">Configuration pfSense, règles de filtrage, segmentation réseau, VPN</div>
+          <div class="sk-bar">
+            <div class="sk-prog" style="background:linear-gradient(90deg,var(--c4),var(--c5));width:78%"></div>
+          </div>
+        </div>
+
+        <!-- Carte 5 : Active Directory -->
+        <div class="sk reveal reveal-delay-2">
+          <div class="sk-icon">🖥️</div>
+          <div class="sk-name">Active Directory</div>
+          <div class="sk-desc">Déploiement AD DS, gestion utilisateurs/groupes, DNS/DHCP, domaine</div>
+          <div class="sk-bar">
+            <div class="sk-prog" style="background:linear-gradient(90deg,var(--c1),var(--c3));width:80%"></div>
+          </div>
+        </div>
+
+        <!-- Carte 6 : Virtualisation -->
+        <div class="sk reveal reveal-delay-3">
+          <div class="sk-icon">⚙️</div>
+          <div class="sk-name">Virtualisation</div>
+          <div class="sk-desc">VirtualBox/VMware — lab complet VMs interconnectées et fonctionnelles</div>
+          <div class="sk-bar">
+            <div class="sk-prog" style="background:linear-gradient(90deg,var(--c5),var(--c2));width:82%"></div>
+          </div>
+        </div>
+
+      </div><!-- /.skills-grid -->
+    </div><!-- /.section-inner -->
+  </section><!-- /#skills -->
+
+
+  <!-- ============================================================
+       SECTION STAGE — INFO2R
+       Détaille les missions effectuées pendant le stage.
+       Divisée en 2 blocs :
+       - Tâches maintenance (grille 2 colonnes, 6 items)
+       - Tâches sécurité (1 item, fond rose discret)
+  ============================================================ -->
+  <section id="stage" class="stage-section">
+    <div class="section-inner">
+      <div class="s-label reveal">Expérience professionnelle</div>
+      <div class="s-title reveal reveal-delay-1">Stage — Info2R</div>
+
+      <div class="stage-card reveal reveal-delay-2">
+
+        <!-- En-tête de la carte : nom + rôle + badge -->
+        <div class="stage-header">
+          <div>
+            <div class="stage-co">Info2R</div>
+            <div class="stage-role">Technicien de maintenance informatique • Stage BTS SIO SISR</div>
+          </div>
+          <div class="stage-badge">
+            <span class="status-dot"></span>
+            Stage validé
+          </div>
+        </div>
+
+        <!-- Bloc tâches de maintenance -->
+        <div class="missions-block">
+          <div class="missions-label">Tâches maintenance informatique</div>
+          <div class="missions-grid">
+
+            <!-- Mission 1 : Diagnostic -->
+            <div class="mission-item">
+              <span class="m-icon">🔍</span>
+              <div class="m-text">
+                <strong>Détection de pannes</strong>
+                Diagnostic matériel et logiciel, identification des composants défaillants et préconisations
+              </div>
+            </div>
+
+            <!-- Mission 2 : Dalle -->
+            <div class="mission-item">
+              <span class="m-icon">📱</span>
+              <div class="m-text">
+                <strong>Changement de dalle</strong>
+                Démontage et remplacement d'écrans sur ordinateurs portables
+              </div>
+            </div>
+
+            <!-- Mission 3 : RAM et HDD/SSD -->
+            <div class="mission-item">
+              <span class="m-icon">💾</span>
+              <div class="m-text">
+                <strong>RAM & Disque dur</strong>
+                Remplacement et upgrade de mémoire vive et stockage (HDD/SSD)
+              </div>
+            </div>
+
+            <!-- Mission 4 : Clavier -->
+            <div class="mission-item">
+              <span class="m-icon">⌨️</span>
+              <div class="m-text">
+                <strong>Changement de clavier</strong>
+                Démontage et remplacement de claviers sur ordinateurs portables
+              </div>
+            </div>
+
+            <!-- Mission 5 : OS -->
+            <div class="mission-item">
+              <span class="m-icon">💿</span>
+              <div class="m-text">
+                <strong>Installation d'OS</strong>
+                Déploiement Linux et Windows, partitionnement, configuration post-installation
+              </div>
+            </div>
+
+            <!-- Mission 6 : Pâte thermique -->
+            <div class="mission-item">
+              <span class="m-icon">🌡️</span>
+              <div class="m-text">
+                <strong>Pâte thermique processeur</strong>
+                Remplacement sur CPU pour résoudre les problèmes de surchauffe
+              </div>
+            </div>
+
+          </div><!-- /.missions-grid -->
+        </div><!-- /.missions-block -->
+
+        <!-- Bloc tâches sécurité (séparé par un trait horizontal) -->
+        <div class="secu-block">
+          <div class="missions-label">Tâches sécurité</div>
+          <div class="secu-item">
+            <span class="m-icon">🔑</span>
+            <div class="m-text">
+              <strong>Récupération de mot de passe Windows</strong>
+              Récupération et réinitialisation de sessions Windows bloquées — intervention sécurisée sur les accès système
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.stage-card -->
+    </div><!-- /.section-inner -->
+  </section><!-- /#stage -->
+
+
+  <!-- ============================================================
+       SECTION LAB PERSONNEL
+       Topologie visuelle du home lab virtuel en grille de nœuds.
+       Chaque nœud représente une VM avec icône, nom et rôle.
+       Le nœud AD est mis en évidence (couleur orangée) car il
+       contient PingCastle. Un bandeau informatif explique l'outil.
+  ============================================================ -->
+  <section id="lab" class="lab-section">
+    <div class="section-inner">
+      <div class="s-label reveal">Projet personnel</div>
+      <div class="s-title reveal reveal-delay-1">Lab virtuel personnel</div>
+
+      <div class="lab-card reveal reveal-delay-2">
+
+        <p class="lab-subtitle">
+          Infrastructure virtuelle complète simulant un <strong>SI d'entreprise</strong> —
+          pare-feu, annuaire, helpdesk, base de données et machines d'attaque/défense interconnectées.
+        </p>
+
+        <!-- Grille des VMs / nœuds du lab -->
+        <div class="topo-grid">
+
+          <!-- pfSense : pare-feu / routeur — en rouge au survol -->
+          <div class="topo-node node-pfsense">
+            <div class="tn-icon">🔥</div>
+            <div class="tn-name">pfSense</div>
+            <div class="tn-role">Pare-feu / Routeur</div>
+          </div>
+
+          <!-- Active Directory : toujours mis en avant (bordure orangée) -->
+          <!-- PingCastle y est installé — badge affiché en permanence -->
+          <div class="topo-node node-ad">
+            <div class="tn-icon">🖥️</div>
+            <div class="tn-name">Active Directory</div>
+            <div class="tn-role">Windows Server AD DS</div>
+            <span class="tn-badge">PingCastle ✓</span>
+          </div>
+
+          <!-- Poste client joint au domaine AD -->
+          <div class="topo-node node-client">
+            <div class="tn-icon">💻</div>
+            <div class="tn-name">Client</div>
+            <div class="tn-role">Poste Windows joint au domaine</div>
+          </div>
+
+          <!-- GLPI : outil de ticketing IT (s'appuie sur MariaDB) -->
+          <div class="topo-node node-glpi">
+            <div class="tn-icon">🎫</div>
+            <div class="tn-name">GLPI</div>
+            <div class="tn-role">Ticketing / ITSM</div>
+          </div>
+
+          <!-- MariaDB : base de données pour GLPI -->
+          <div class="topo-node node-db">
+            <div class="tn-icon">🗄️</div>
+            <div class="tn-name">MariaDB</div>
+            <div class="tn-role">Base de données GLPI</div>
+          </div>
+
+          <!-- Kali Linux : machine attaquante pour les tests de pénétration -->
+          <div class="topo-node node-kali">
+            <div class="tn-icon">🐉</div>
+            <div class="tn-name">Kali Linux</div>
+            <div class="tn-role">Pentest / Audit</div>
+          </div>
+
+          <!-- Metasploitable : machine volontairement vulnérable comme cible -->
+          <div class="topo-node node-meta">
+            <div class="tn-icon">🎯</div>
+            <div class="tn-name">Metasploitable</div>
+            <div class="tn-role">Cible d'entraînement</div>
+          </div>
+
+        </div><!-- /.topo-grid -->
+
+        <!-- Bandeau explicatif sur PingCastle -->
+        <div class="pingcastle-banner">
+          <span class="pc-icon">🏰</span>
+          <div>
+            <div class="pc-title">PingCastle — Audit Active Directory</div>
+            <div class="pc-desc">
+              Outil d'audit de sécurité AD installé et exécuté sur le contrôleur de domaine.
+              Génère un <strong>score de risque</strong> et identifie les mauvaises configurations,
+              comptes vulnérables, délégations Kerberos risquées et failles potentielles dans
+              l'infrastructure Active Directory.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.lab-card -->
+    </div><!-- /.section-inner -->
+  </section><!-- /#lab -->
+
+
+  <!-- ============================================================
+       SECTION CERTIFICATIONS & FORMATIONS
+       6 cartes de certification avec icône, nom, organisme et
+       badge de statut (En cours / Obtenu).
+       ⚠️  À PERSONNALISER : mettre uniquement tes vraies certifs !
+  ============================================================ -->
+  <section id="certs" class="certs-section">
+    <div class="section-inner">
+      <div class="s-label reveal">Parcours</div>
+      <div class="s-title reveal reveal-delay-1">Formations & Certifications</div>
+      <div class="certs-grid">
+
+        <!-- BTS SIO SISR -->
+        <div class="cert-card reveal reveal-delay-1">
+          <div class="cert-icon" style="background:rgba(108,59,255,.15)">🎓</div>
+          <div>
+            <div class="cert-name">BTS SIO — SISR</div>
+            <div class="cert-org">Option Infrastructures, Systèmes et Réseaux</div>
+            <span class="cert-status status-ongoing">En cours 2026–2027</span>
+          </div>
+        </div>
+
+        <!-- CCNA -->
+        <div class="cert-card reveal reveal-delay-2">
+          <div class="cert-icon" style="background:rgba(0,212,170,.15)">🌐</div>
+          <div>
+            <div class="cert-name">Cisco CCNA</div>
+            <div class="cert-org">Networking Academy • Cisco</div>
+            <span class="cert-status status-ongoing">En cours</span>
+          </div>
+        </div>
+
+        <!-- SecNumacadémie ANSSI -->
+        <div class="cert-card reveal reveal-delay-3">
+          <div class="cert-icon" style="background:rgba(255,154,60,.15)">🛡️</div>
+          <div>
+            <div class="cert-name">SecNumacadémie</div>
+            <div class="cert-org">ANSSI • Cybersécurité</div>
+            <span class="cert-status status-done">En cours</span>
+          </div>
+        </div>
+
+        <!-- Linux Essentials LPI -->
+        <div class="cert-card reveal reveal-delay-1">
+          <div class="cert-icon" style="background:rgba(255,92,122,.15)">🐧</div>
+          <div>
+            <div class="cert-name">Linux Essentials</div>
+            <div class="cert-org">LPI — Linux Professional Institute</div>
+            <span class="cert-status status-ongoing">En cours</span>
+          </div>
+        </div>
+
+        <!-- PIX4 RGPD CNIL -->
+        <div class="cert-card reveal reveal-delay-2">
+          <div class="cert-icon" style="background:rgba(108,59,255,.15)">🔒</div>
+          <div>
+            <div class="cert-name">PIX4 — RGPD</div>
+            <div class="cert-org">CNIL • Protection des données</div>
+            <span class="cert-status status-done">Obtenu</span>
+          </div>
+        </div>
+
+        <!-- Azure Fundamentals AZ-900 -->
+        <div class="cert-card reveal reveal-delay-3">
+          <div class="cert-icon" style="background:rgba(0,212,170,.15)">☁️</div>
+          <div>
+            <div class="cert-name">Azure Fundamentals AZ-900</div>
+            <div class="cert-org">Microsoft Learn</div>
+            <span class="cert-status status-ongoing">En cours</span>
+          </div>
+        </div>
+
+      </div><!-- /.certs-grid -->
+    </div><!-- /.section-inner -->
+  </section><!-- /#certs -->
+
+
+  <!-- ============================================================
+       SECTION CONTACT
+       Carte avec 3 liens : Email, LinkedIn, GitHub.
+       ⚠️  À PERSONNALISER : mettre tes vraies coordonnées !
+  ============================================================ -->
+  <section id="contact" class="contact-section">
+    <div class="section-inner">
+      <div class="s-label reveal">Me contacter</div>
+      <div class="s-title reveal reveal-delay-1">Restons en contact</div>
+
+      <div class="contact-wrap reveal reveal-delay-2">
+        <div class="ct-title">Travaillons ensemble</div>
+        <div class="ct-sub">
+          Disponible pour une alternance, un stage ou toute opportunité dans le domaine
+          des réseaux et de la cybersécurité. N'hésitez pas à me contacter !
+        </div>
+
+        <div class="contact-links">
+
+          <!-- Lien email — remplacer l'adresse par la tienne -->
+          <a class="cl" href="mailto:kellebokorimi21@email.com">
+            <div class="cl-icon" style="background:rgba(108,59,255,.15);color:#A98BFF">@</div>
+            <span class="cl-text">kellebokorimi21@email.com</span>
+            <span class="cl-arrow">→</span>
+          </a>
+
+          <!-- Lien LinkedIn — remplacer l'URL par ton profil -->
+          <a class="cl" href="https://linkedin.com/in/TON-PROFIL" target="_blank" rel="noopener">
+            <div class="cl-icon" style="background:rgba(0,212,170,.15);color:#00D4AA;font-size:.7rem">in</div>
+            <span class="cl-text">LinkedIn — ABAKAR ADOUM KELLE</span>
+            <span class="cl-arrow">→</span>
+          </a>
+
+          <!-- Lien GitHub — remplacer par ton username -->
+          <a class="cl" href="https://github.com/TON-USERNAME" target="_blank" rel="noopener">
+            <div class="cl-icon" style="background:rgba(255,255,255,.07);color:#7A779A;font-size:.7rem">gh</div>
+            <span class="cl-text">GitHub — ton-username</span>
+            <span class="cl-arrow">→</span>
+          </a>
+
+        </div><!-- /.contact-links -->
+      </div><!-- /.contact-wrap -->
+    </div><!-- /.section-inner -->
+  </section><!-- /#contact -->
+
+
+  <!-- Pied de page -->
+  <footer>
+    <p>© 2027 <span>ABAKAR ADOUM KELLE</span> — BTS SIO option SISR · Portfolio technique</p>
+  </footer>
+
+
+  <!-- ============================================================
+       JAVASCRIPT
+       Regroupé en fin de body pour ne pas bloquer le rendu HTML.
+       Divisé en 5 blocs fonctionnels :
+       1. Curseur personnalisé (point + anneau avec inertie)
+       2. Particules flottantes (générées dynamiquement)
+       3. Navigation sticky (classe .scrolled au scroll)
+       4. Animations au scroll (IntersectionObserver)
+       5. Effet typewriter sur le nom
+  ============================================================ -->
+  <script>
+
+    /* ----------------------------------------------------------
+       1. CURSEUR PERSONNALISÉ
+       - Le point #cursor suit la souris immédiatement (style direct)
+       - L'anneau #cursor-ring suit avec une inertie (lerp 15%)
+       - Au survol d'éléments interactifs, le curseur grossit et
+         change de couleur (rose au lieu de violet)
+    ---------------------------------------------------------- */
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursor-ring');
+
+    // Coordonnées cibles (souris) et actuelles (anneau)
+    let mx = 0, my = 0; // position souris
+    let rx = 0, ry = 0; // position actuelle de l'anneau
+
+    // Mise à jour immédiate du point central à chaque mouvement
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX;
+      my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+    });
+
+    // Boucle d'animation : l'anneau converge vers la souris (lerp = 15%)
+    function animateRing() {
+      rx += (mx - rx) * 0.15; // interpolation linéaire vers mx
+      ry += (my - ry) * 0.15;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animateRing); // relance à chaque frame (~60fps)
+    }
+    animateRing();
+
+    // Agrandissement du curseur au survol des éléments cliquables
+    document.querySelectorAll('a, button, .sk, .topo-node, .mission-item, .cert-card, .sm').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width       = '20px';
+        cursor.style.height      = '20px';
+        cursor.style.background  = 'var(--c2)';   // rose
+        ring.style.width         = '50px';
+        ring.style.height        = '50px';
+        ring.style.borderColor   = 'rgba(255,92,122,0.5)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width       = '12px';
+        cursor.style.height      = '12px';
+        cursor.style.background  = 'var(--c1)';   // violet
+        ring.style.width         = '36px';
+        ring.style.height        = '36px';
+        ring.style.borderColor   = 'rgba(108,59,255,0.5)';
+      });
+    });
+
+
+    /* ----------------------------------------------------------
+       2. PARTICULES FLOTTANTES
+       Crée 20 petits points colorés dans #particles.
+       Chaque particule a une position, taille, couleur et durée
+       d'animation aléatoires → effet unique à chaque chargement.
+    ---------------------------------------------------------- */
+    const pContainer = document.getElementById('particles');
+    const colors = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)'];
+
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = `
+        left:               ${Math.random() * 100}%;       /* position X aléatoire */
+        bottom:             -10px;                          /* démarre sous le hero */
+        background:         ${colors[Math.floor(Math.random() * colors.length)]};
+        animation-duration: ${6 + Math.random() * 10}s;   /* vitesse aléatoire */
+        animation-delay:    ${Math.random() * 8}s;         /* décalage aléatoire */
+        width:              ${1 + Math.random() * 2}px;    /* taille aléatoire */
+        height:             ${1 + Math.random() * 2}px;
+      `;
+      pContainer.appendChild(p);
+    }
+
+
+    /* ----------------------------------------------------------
+       3. NAVIGATION STICKY
+       Ajoute la classe .scrolled sur <nav> dès que l'utilisateur
+       défile de plus de 60px. Le CSS réduit alors le padding.
+    ---------------------------------------------------------- */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      // toggle : ajoute si true, retire si false
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+
+    /* ----------------------------------------------------------
+       4. ANIMATIONS AU SCROLL — IntersectionObserver
+       Observe tous les éléments .reveal.
+       Quand un élément entre dans le viewport (seuil 15%) :
+       - Il reçoit .visible → déclenchement de l'animation CSS
+       - Ses barres de compétences (.sk-prog, .skfill) reçoivent
+         .animated → elles se remplissent progressivement
+       - L'observer se désabonne (unobserve) pour éviter les
+         recalculs inutiles.
+    ---------------------------------------------------------- */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible'); // déclenche fadeInUp CSS
+
+          // Anime les barres de compétences à l'intérieur de l'élément
+          entry.target.querySelectorAll('.sk-prog, .skfill').forEach(bar => {
+            bar.classList.add('animated');
+          });
+
+          observer.unobserve(entry.target); // ne ré-observe pas
+        }
+      });
+    }, { threshold: 0.15 }); // se déclenche quand 15% de l'élément est visible
+
+    // Attache l'observer à tous les éléments à révéler
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+
+    /* ----------------------------------------------------------
+       5. BARRES DE LA HERO-CARD AU CHARGEMENT
+       Les barres de la carte flottante hero ne sont pas gérées
+       par l'observer (elles sont toujours visibles au chargement).
+       On déclenche l'animation après 800ms (après les entrées CSS).
+    ---------------------------------------------------------- */
+    setTimeout(() => {
+      document.querySelectorAll('.hero-card .skfill').forEach(b => b.classList.add('animated'));
+    }, 800);
+
+
+    /* ----------------------------------------------------------
+       6. EFFET TYPEWRITER SUR LE NOM
+       "ADOUM KELLÉ" est vidé au démarrage puis les lettres
+       s'ajoutent une par une toutes les 80ms.
+       Démarre après 600ms (laisse le temps à fadeInUp de se lancer).
+    ---------------------------------------------------------- */
+    const line2    = document.querySelector('.line2');
+    const fullText = 'ADOUM KELLE';
+    line2.textContent = ''; // vide le texte initial
+
+    let charIndex = 0;
+    setTimeout(() => {
+      const typeInterval = setInterval(() => {
+        line2.textContent += fullText[charIndex]; // ajoute la prochaine lettre
+        charIndex++;
+        if (charIndex >= fullText.length) {
+          clearInterval(typeInterval); // arrête quand tout est affiché
+        }
+      }, 80); // 80ms entre chaque lettre
+    }, 600); // délai initial avant de commencer
+
+  </script>
+
+</body>
+</html>
